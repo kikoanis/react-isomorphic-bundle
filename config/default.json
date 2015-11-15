@@ -17,9 +17,9 @@
     "FACEBOOK_CALLBACK": "/auth/facebook/callback"
   },
   "sequelize": {
-    "DATABASE": "",
-    "USERNAME": "",
-    "PASSWORD": ""
+    "DATABASE": "test",
+    "USERNAME": "testuser",
+    "PASSWORD": "12345678"
   },
   "jwt": {
     "SECRET_OR_KEY": "thisisasecretkey",

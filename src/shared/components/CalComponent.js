@@ -7,13 +7,13 @@ import { isSameDay } from 'shared/utils/date-utils'
 import moment from 'moment'
 import 'moment/locale/zh-tw'
 import 'moment/locale/zh-cn'
-import counterpart from 'counterpart'
 import WallButtons from 'shared/components/wall/WallButtons'
 import { fixLocaleName } from 'shared/utils/locale-utils'
 import { BaseComponent } from 'shared/components'
 import { createHistory } from 'history'
 import queryString from 'query-string'
 import ADContent from './ADContent'
+import localeChangeHandler from './LocaleChangeHandler'
 
 let unlisten
 let history
@@ -22,13 +22,15 @@ if (process.env.BROWSER) {
   history = createHistory()
 }
 
+@localeChangeHandler()
 export default class Cal extends Component {
 
   static propTypes = {
     fetchList: PropTypes.func.isRequired,
     countPostsWithCal: PropTypes.func.isRequired,
     post: PropTypes.object.isRequired,
-    defaultLocale: PropTypes.string.isRequired
+    defaultLocale: PropTypes.string.isRequired,
+    locale: PropTypes.string.isRequired
   }
 
   constructor (props) {
@@ -59,14 +61,11 @@ export default class Cal extends Component {
       date: day
         ? moment(day).startOf('day').valueOf()
         : moment(new Date()).startOf('day').valueOf(),
-      selectedDay: day ? new Date(day) : new Date(),
-      locale: fixLocaleName(this.props.defaultLocale)
+      selectedDay: day ? new Date(day) : new Date()
     })
   }
 
   componentDidMount () {
-    counterpart.onLocaleChange(this.handleLocaleChange)
-
     const day = this.state.date
     if (day) {
       const date = moment(day).startOf('day').valueOf()
@@ -75,7 +74,6 @@ export default class Cal extends Component {
   }
 
   componentWillUnmount () {
-    counterpart.offLocaleChange(this.handleLocaleChange)
     if (this.op) {
       typeof unlisten === 'function' && unlisten()
     }
@@ -122,11 +120,6 @@ export default class Cal extends Component {
     this.props.countPostsWithCal(moment(day).year(), moment(day).month() + 1)
   }
 
-  handleLocaleChange = (newLocale) => {
-    moment.locale(fixLocaleName(newLocale))
-    this.setState({ locale: newLocale })
-  }
-
   loadFunc = () => {
     const { post } = this.props
     this.props.fetchList(post.offset, post.limit, this.state.date)
@@ -161,7 +154,8 @@ export default class Cal extends Component {
     const Translate = require('react-translate-component')
     const { post } = this.props
     const loading = post.isFetching || false
-    const { selectedDay, locale } = this.state
+    const { selectedDay } = this.state
+    const { locale } = this.props
     const modifiers = {
       'sunday': (day) => day.getDay() === 0,
       'saturday': (day) => day.getDay() === 6,
