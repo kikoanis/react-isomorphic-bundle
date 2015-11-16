@@ -1,11 +1,12 @@
 import React, { Component, PropTypes } from 'react'
 import counterpart from 'counterpart'
+import _ from 'lodash'
 import { fixLocaleName } from 'shared/utils/locale-utils'
 import moment from 'moment'
 import 'moment/locale/zh-tw'
 import 'moment/locale/zh-cn'
 
-export default function localeChangeHandler() {
+export default function localeChangeHandler(handler) {
   return function wrapWithWrapper(WrappedComponent) {
     class Wrapper extends Component {
       static propTypes = {
@@ -28,10 +29,14 @@ export default function localeChangeHandler() {
       handleLocaleChange = (newLocale) => {
         moment.locale(fixLocaleName(newLocale))
         this.setState({ locale: newLocale })
+        if (handler) {
+          this.setState(handler(newLocale))
+        }
       }
 
       render() {
-        return <WrappedComponent {...this.props} locale={ this.state.locale } />
+        console.log(...this.state)
+        return <WrappedComponent {...this.props} {...this.state} />
       }
     }
 

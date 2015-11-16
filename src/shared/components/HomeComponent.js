@@ -7,30 +7,21 @@ import { PostPropArray } from 'shared/utils/forms'
 import counterpart from 'counterpart'
 import { originLocaleName } from 'shared/utils/locale-utils'
 import { tongwenAutoStr } from 'shared/utils/tongwen'
+import localeChangeHandler from './LocaleChangeHandler'
 
+@localeChangeHandler()
 export default class HomeComponent extends Component {
 
   static propTypes = {
     post: PropTypes.object.isRequired,
-    defaultLocale: PropTypes.string.isRequired
+    defaultLocale: PropTypes.string.isRequired,
+    locale: PropTypes.string
   }
 
   constructor (props) {
     super(props)
 
     this.state = { locale: props.defaultLocale}
-  }
-
-  componentDidMount () {
-    counterpart.onLocaleChange(this.handleLocaleChange)
-  }
-
-  componentWillUnmount () {
-    counterpart.offLocaleChange(this.handleLocaleChange)
-  }
-
-  handleLocaleChange = (newLocale) => {
-    this.setState({ locale: newLocale })
   }
 
   renderNews (posts) {
@@ -50,21 +41,23 @@ export default class HomeComponent extends Component {
     ? toShortDate(post.endDate)
     : toShortDate(post.startDate) + ' - ' + toShortDate(post.endDate)
 
+    const locale = this.props.locale || this.state.locale
+
     return (
     <div key={post.id} className="ui orange icon message">
       <div className="content">
         <h3>
           <Link to={`/w/${post.id}`}>
             <span className="ui orange">
-              [{at(PostPropArray(originLocaleName(this.state.locale)), post.prop)}]
+              [{at(PostPropArray(originLocaleName(locale)), post.prop)}]
             </span>
             <span> </span>
-            {tongwenAutoStr(post.ocname, this.state.locale)
+            {tongwenAutoStr(post.ocname, locale)
               || <Translate content="news.unnamed" />}
           </Link>
         </h3>
         <div className="header">
-          {tongwenAutoStr(post.title, this.state.locale)}
+          {tongwenAutoStr(post.title, locale)}
         </div>
       </div>
     </div>

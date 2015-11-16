@@ -9,13 +9,16 @@ import {
 import { isEmpty, clone } from 'lodash'
 import classNames from 'classnames'
 import counterpart from 'counterpart'
+import localeChangeHandler from './LocaleChangeHandler'
 
+@localeChangeHandler(newLocale => ({options: ChangePasswordFormOptions(newLocale)}))
 export default class ChangePassword extends Component {
 
   static propTypes = {
     changePassword: PropTypes.func.isRequired,
     user: PropTypes.object.isRequired,
-    defaultLocale: PropTypes.string.isRequired
+    defaultLocale: PropTypes.string.isRequired,
+    options: PropTypes.object
   }
 
   constructor (props) {
@@ -31,26 +34,15 @@ export default class ChangePassword extends Component {
     }
   }
 
-  componentDidMount () {
-    counterpart.onLocaleChange(this.handleLocaleChange)
-  }
-
   componentWillReceiveProps (nextProps) {
     this.validation(nextProps.user.errors)
     this.checkSubmited(nextProps.user._info)
   }
 
   componentWillUnmount () {
-    counterpart.offLocaleChange(this.handleLocaleChange)
     if (this.op) {
       clearTimeout(this.releaseTimeout)
     }
-  }
-
-  handleLocaleChange = (newLocale) => {
-    this.setState({
-      options: ChangePasswordFormOptions(newLocale)
-    })
   }
 
   handleChange = (value, path) => {
@@ -104,7 +96,7 @@ export default class ChangePassword extends Component {
   }
 
   clearFormErrors = () => {
-    const options = clone(this.state.options)
+    const options = clone(this.props.options || this.state.options)
     options.fields = clone(options.fields)
 
     for (const key in options.fields) {
@@ -135,7 +127,6 @@ export default class ChangePassword extends Component {
 
   render () {
     const Translate = require('react-translate-component')
-
     const LoadingClass = classNames(
       'ui',
       'form',
@@ -175,7 +166,7 @@ export default class ChangePassword extends Component {
             <Form
               ref="form"
               type={ChangePasswordForm}
-              options={this.state.options}
+              options={this.props.options || this.state.options}
               value={this.state.value}
               onChange={this.handleChange} />
             <div className="ui hidden divider" />

@@ -10,7 +10,9 @@ import {
 import { isEmpty, clone, omit } from 'lodash'
 import classNames from 'classnames'
 import counterpart from 'counterpart'
+import localeChangeHandler from './LocaleChangeHandler'
 
+@localeChangeHandler(newLocale => ({options: LoginFormOptions(newLocale)}))
 export default class Login extends Component {
 
   static propTypes = {
@@ -18,7 +20,9 @@ export default class Login extends Component {
     save: PropTypes.func.isRequired,
     auth: PropTypes.object.isRequired,
     location: PropTypes.object.isRequired,
-    defaultLocale: PropTypes.string.isRequired
+    defaultLocale: PropTypes.string.isRequired,
+    locale: PropTypes.string,
+    options: PropTypes.object
   }
 
   static contextTypes = {
@@ -36,10 +40,6 @@ export default class Login extends Component {
       ok: false,
       options: LoginFormOptions(props.defaultLocale)
     }
-  }
-
-  componentDidMount () {
-    counterpart.onLocaleChange(this.handleLocaleChange)
   }
 
   componentWillReceiveProps (nextProps) {
@@ -76,7 +76,6 @@ export default class Login extends Component {
   }
 
   componentWillUnmount () {
-    counterpart.offLocaleChange(this.handleLocaleChange)
     if (this.op) {
       clearTimeout(this.releaseTimeout)
       clearTimeout(this.shakeTimeout)
@@ -107,7 +106,7 @@ export default class Login extends Component {
   }
 
   clearFormErrors = () => {
-    const options = clone(this.state.options)
+    const options = clone(this.props.options || this.state.options)
     options.fields = clone(options.fields)
 
     for (const key in options.fields) {
@@ -122,7 +121,7 @@ export default class Login extends Component {
   }
 
   fillFormAllErrors = () => {
-    const options = clone(this.state.options)
+    const options = clone(this.props.options || this.state.options)
     options.fields = clone(options.fields)
 
     for (const key in options.fields) {
@@ -191,7 +190,7 @@ export default class Login extends Component {
                 <Form
                   ref="form"
                   type={LoginForm}
-                  options={this.state.options}
+                  options={this.props.options || this.state.options}
                   value={this.state.value}
                 />
                 <div className="ui hidden divider" />
