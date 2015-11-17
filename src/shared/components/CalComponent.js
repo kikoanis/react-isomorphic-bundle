@@ -4,16 +4,12 @@ import Cards from 'shared/components/wall/PostCards'
 import DayPicker from 'react-day-picker'
 import { LocaleUtils } from 'react-day-picker/lib/addons'
 import { isSameDay } from 'shared/utils/date-utils'
-import moment from 'moment'
-import 'moment/locale/zh-tw'
-import 'moment/locale/zh-cn'
 import WallButtons from 'shared/components/wall/WallButtons'
-import { fixLocaleName } from 'shared/utils/locale-utils'
-import { BaseComponent } from 'shared/components'
 import { createHistory } from 'history'
 import queryString from 'query-string'
 import ADContent from './ADContent'
-import localeChangeHandler from './LocaleChangeHandler'
+import { fixLocaleName } from 'shared/utils/locale-utils'
+import moment from 'moment'
 
 let unlisten
 let history
@@ -22,15 +18,13 @@ if (process.env.BROWSER) {
   history = createHistory()
 }
 
-@localeChangeHandler()
 export default class Cal extends Component {
 
   static propTypes = {
     fetchList: PropTypes.func.isRequired,
     countPostsWithCal: PropTypes.func.isRequired,
     post: PropTypes.object.isRequired,
-    defaultLocale: PropTypes.string.isRequired,
-    locale: PropTypes.string.isRequired
+    defaultLocale: PropTypes.string.isRequired
   }
 
   constructor (props) {
@@ -38,8 +32,6 @@ export default class Cal extends Component {
   }
 
   componentWillMount () {
-    moment.locale(fixLocaleName(this.props.defaultLocale))
-
     let day
 
     if (process.env.BROWSER) {
@@ -74,9 +66,7 @@ export default class Cal extends Component {
   }
 
   componentWillUnmount () {
-    if (this.op) {
-      typeof unlisten === 'function' && unlisten()
-    }
+    typeof unlisten === 'function' && unlisten()
   }
 
   getTodayCount (date) {
@@ -155,7 +145,6 @@ export default class Cal extends Component {
     const { post } = this.props
     const loading = post.isFetching || false
     const { selectedDay } = this.state
-    const { locale } = this.props
     const modifiers = {
       'sunday': (day) => day.getDay() === 0,
       'saturday': (day) => day.getDay() === 6,
@@ -176,7 +165,7 @@ export default class Cal extends Component {
             modifiers={modifiers}
             onDayClick={this.handleDayClick}
             onMonthChange={this.handleMonthChange}
-            locale={fixLocaleName(locale)}
+            locale={fixLocaleName(this.props.defaultLocale)}
             localeUtils={LocaleUtils}
           />
           <ADContent />

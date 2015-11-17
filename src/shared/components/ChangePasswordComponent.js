@@ -1,24 +1,16 @@
 import React, { Component, PropTypes } from 'react'
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
-import { BaseComponent } from 'shared/components'
-import {
-  Form,
-  ChangePasswordForm,
-  ChangePasswordFormOptions
-} from 'shared/utils/forms'
+import { Form, ChangePasswordForm } from 'shared/utils/forms'
 import { isEmpty, clone } from 'lodash'
 import classNames from 'classnames'
-import counterpart from 'counterpart'
-import localeChangeHandler from './LocaleChangeHandler'
 
-@localeChangeHandler(newLocale => ({options: ChangePasswordFormOptions(newLocale)}))
 export default class ChangePassword extends Component {
 
   static propTypes = {
     changePassword: PropTypes.func.isRequired,
+    changePasswordInit: PropTypes.func.isRequired,
     user: PropTypes.object.isRequired,
-    defaultLocale: PropTypes.string.isRequired,
-    options: PropTypes.object
+    options: PropTypes.object.isRequired
   }
 
   constructor (props) {
@@ -28,7 +20,7 @@ export default class ChangePassword extends Component {
     this.releaseTimeout = undefined
     this.state = {
       value: { password: '', passwordCheck: '' },
-      options: ChangePasswordFormOptions(props.defaultLocale),
+      options: props.options,
       submited: false,
       updated: false
     }
@@ -37,6 +29,8 @@ export default class ChangePassword extends Component {
   componentWillReceiveProps (nextProps) {
     this.validation(nextProps.user.errors)
     this.checkSubmited(nextProps.user._info)
+
+    this.setState({ options: nextProps.options })
   }
 
   componentWillUnmount () {
@@ -96,7 +90,7 @@ export default class ChangePassword extends Component {
   }
 
   clearFormErrors = () => {
-    const options = clone(this.props.options || this.state.options)
+    const options = clone(this.state.options)
     options.fields = clone(options.fields)
 
     for (const key in options.fields) {
@@ -118,6 +112,7 @@ export default class ChangePassword extends Component {
 
   checkSubmited (info) {
     if (!isEmpty(info)) {
+      this.props.changePasswordInit()
       this.setState({ submited: false })
       if (info.email) {
         this.setState({ updated: true })
@@ -127,6 +122,7 @@ export default class ChangePassword extends Component {
 
   render () {
     const Translate = require('react-translate-component')
+
     const LoadingClass = classNames(
       'ui',
       'form',
@@ -166,7 +162,7 @@ export default class ChangePassword extends Component {
             <Form
               ref="form"
               type={ChangePasswordForm}
-              options={this.props.options || this.state.options}
+              options={this.state.options}
               value={this.state.value}
               onChange={this.handleChange} />
             <div className="ui hidden divider" />

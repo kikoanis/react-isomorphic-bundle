@@ -1,5 +1,8 @@
 languages:
   JavaScript: true
+engines:
+  eslint:
+    enabled: true
 exclude_paths:
 - styles/*
 - public/*
@@ -11,3 +14,4 @@ exclude_paths:
 - src/server/db/migrations/*
 - src/server/db/models/*
 - src/shared/utils/semantic-custom.js
+- src/vendor/*
